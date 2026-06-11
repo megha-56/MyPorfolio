@@ -1,0 +1,4 @@
+/* Google Fonts CDN imports â€” substituted for missing local TTFs.
+   The brand uses Inter Tight, Instrument Serif, JetBrains Mono.
+   Drop in /fonts/*.ttf and switch colors_and_type.css if you want self-hosted. */
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300..900;1,300..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
