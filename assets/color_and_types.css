@@ -1,0 +1,265 @@
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   Flagged AI â€” Colors & Type
+   Design tokens for the brand that "sits between a scam job and its victim".
+
+   Source: src/app/globals.css of the flagged.ai codebase.
+   Light, classy, warm off-white surface with near-black ink and a single
+   warm-red accent that ties back to the flag in the shield logo.
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* ============ FONT FACES ============
+   Self-hosted webfonts in /fonts. Falls back gracefully if missing. */
+
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./fonts/InterTight.ttf") format("truetype-variations"),
+       url("./fonts/InterTight.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/InstrumentSerif-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/InstrumentSerif-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("./fonts/JetBrainsMono.ttf") format("truetype-variations"),
+       url("./fonts/JetBrainsMono.ttf") format("truetype");
+}
+
+/* ============ DESIGN TOKENS ============ */
+:root {
+  /* â”€â”€ Surfaces â”€â”€ */
+  --bg:           #FAFAF7;   /* page â€” warm off-white, never pure white  */
+  --bg-elev:      #FFFFFF;   /* cards, composer, inputs                  */
+  --bg-sunken:    #F4F3EE;   /* footers, code wells, recessed regions    */
+  --bg-sidebar:   #F7F6F2;   /* sidebar (slightly off page bg)           */
+  --bg-dark:      #1F1F1A;   /* user message bubble, dark CTA bg         */
+  --bg-deep:      #0F0F0A;   /* modal headers, deepest dark band         */
+
+  /* â”€â”€ Ink (text) â”€â”€ */
+  --ink-1: #14140F;   /* primary (headings, body)        */
+  --ink-2: #4A4A44;   /* secondary (descriptions)        */
+  --ink-3: #8A8A82;   /* tertiary (meta, captions, hints)*/
+  --ink-4: #B8B7AE;   /* placeholders, disabled, dots    */
+
+  /* â”€â”€ Lines â”€â”€ */
+  --line:        rgba(20, 20, 15, 0.07);
+  --line-strong: rgba(20, 20, 15, 0.12);
+
+  /* â”€â”€ Brand accent â€” warm red, matched to the flag in the shield logo â”€â”€ */
+  --accent:      oklch(0.62 0.16 28);   /* primary brand red       */
+  --accent-soft: oklch(0.97 0.02 28);   /* tinted background       */
+  --accent-ink:  oklch(0.42 0.14 28);   /* readable on accent-soft */
+
+  /* Logo navy â€” used sparingly, mostly inside the logo asset itself */
+  --brand-navy:  #1B3A5C;
+
+  /* â”€â”€ Semantic state colors â”€â”€ */
+  --ok:          oklch(0.62 0.12 150);
+  --ok-soft:     oklch(0.96 0.025 150);
+  --ok-ink:      oklch(0.40 0.12 150);
+
+  --warn:        oklch(0.72 0.13 70);
+  --warn-soft:   oklch(0.97 0.03 70);
+  --warn-ink:    oklch(0.42 0.13 70);
+
+  --danger:      oklch(0.60 0.18 25);   /* same hue family as accent */
+  --danger-soft: var(--accent-soft);
+  --danger-ink:  var(--accent-ink);
+
+  --info:        oklch(0.62 0.13 240);
+  --info-soft:   oklch(0.97 0.02 240);
+  --info-ink:    oklch(0.42 0.14 240);
+
+  --neutral-soft: rgba(20, 20, 15, 0.04);
+
+  /* â”€â”€ Shadows â€” small, soft, layered. Never harsh. â”€â”€ */
+  --shadow-xs: 0 1px 0 rgba(20,20,15,0.04), 0 1px 2px rgba(20,20,15,0.03);
+  --shadow-sm: 0 1px 2px rgba(20,20,15,0.04), 0 2px 6px rgba(20,20,15,0.04);
+  --shadow-md: 0 2px 4px rgba(20,20,15,0.04), 0 8px 24px rgba(20,20,15,0.06);
+  --shadow-lg: 0 4px 12px rgba(20,20,15,0.05), 0 24px 60px rgba(20,20,15,0.08);
+
+  /* â”€â”€ Radii â€” generous on cards, very generous on composer â”€â”€ */
+  --r-sm:   8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  22px;
+  --r-pill: 999px;
+
+  /* â”€â”€ Spacing scale (4px base) â”€â”€ */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* â”€â”€ Typography stacks â”€â”€ */
+  --font-ui:      "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ============ TYPE BASE ============ */
+html {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--ink-1);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+::selection { background: var(--accent-soft); color: var(--accent-ink); }
+
+/* ============ SEMANTIC TYPE STYLES ============
+   Use these classes (or copy the rules) when laying out content.
+   The display family is *only* used for big serif moments and italic accents.
+*/
+
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  color: var(--ink-1);
+}
+.t-display em { font-style: italic; color: var(--accent-ink); }
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--ink-1);
+}
+.t-h1 em { font-style: italic; color: var(--accent-ink); }
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  color: var(--ink-1);
+}
+
+.t-h3 {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+}
+
+.t-title {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+}
+
+.t-body {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  color: var(--ink-1);
+}
+
+.t-body-lg {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  color: var(--ink-1);
+}
+
+.t-meta {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.t-caption {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  color: var(--ink-3);
+}
+
+/* Eyebrow / overline â€” small, tracked, uppercase. Used above headings. */
+.t-eyebrow {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Mono â€” for IDs, technical readouts, kbd, code, scores */
+.t-mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+}
+.t-mono-sm { font: 400 10.5px/1.4 var(--font-mono); color: var(--ink-3); }
+
+/* Italic serif accent â€” the brand's signature voice marker:
+   "Is this offer real?" â€” only the italic word uses this. */
+.t-accent {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent-ink);
+}
+.t-accent-warn { font-family: var(--font-display); font-style: italic; color: var(--warn-ink); }
+.t-accent-ok   { font-family: var(--font-display); font-style: italic; color: var(--ok-ink); }
+
+/* ============ MAPPED RAW ELEMENTS ============
+   Apply these if you want unstyled <h1>/<p> to inherit brand defaults.
+   Designs typically use the .t-* classes above for explicit control. */
+h1 { font: 400 40px/1.12 var(--font-display); letter-spacing: -0.02em; color: var(--ink-1); margin: 0; }
+h2 { font: 400 28px/1.18 var(--font-display); letter-spacing: -0.018em; color: var(--ink-1); margin: 0; }
+h3 { font: 600 18px/1.3 var(--font-ui); letter-spacing: -0.01em; color: var(--ink-1); margin: 0; }
+p  { font: 400 14px/1.6 var(--font-ui); letter-spacing: -0.005em; color: var(--ink-1); margin: 0; }
+code, pre, kbd { font-family: var(--font-mono); }
+em { font-style: italic; }
+strong { font-weight: 600; color: var(--ink-1); }
