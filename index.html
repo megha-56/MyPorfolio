@@ -20,6 +20,21 @@
     overflow-x:hidden;
   }
 
+  /* ============ GLOBAL DOT GRID CANVAS ============ */
+  #globalDotCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+  }
+  /* All page content sits above the canvas */
+  header.nav,
+  section,
+  .marquee,
+  #contact { position:relative; z-index:1; }
+
   /* ---- shared display treatments ---- */
   .poster{
     font-family:"Anton", var(--font-ui);
@@ -35,7 +50,6 @@
       3px 3px 0 var(--ink-1),
       6px 6px 0 rgba(20,20,15,0.12);
   }
-
   .cond{
     font-family:"Oswald", var(--font-ui);
     text-transform:uppercase;
@@ -65,24 +79,20 @@
 
   /* ============ HERO ============ */
   .hero{ position:relative; }
-  .hero-frame{ border-top:1.5px solid var(--ink-1); border-bottom:1.5px solid var(--ink-1); position:relative; overflow:hidden; }
-
-  /* ---- reactive dot canvas ---- */
-  .hero-bg{ position:absolute; inset:0; z-index:0; pointer-events:none; }
-  #heroDotCanvas{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    pointer-events:none;
+  .hero-frame{
+    border-top:1.5px solid var(--ink-1);
+    border-bottom:1.5px solid var(--ink-1);
+    position:relative;
+    overflow:hidden;
   }
-  .hero-bg .glow{
+
+  /* warm radial glow stays on hero only */
+  .hero-glow{
     position:absolute; right:-5%; top:46%; transform:translateY(-50%);
     width:660px; height:660px; max-width:80vw; border-radius:50%;
     background:radial-gradient(circle at 50% 50%, var(--accent-soft) 0%, rgba(250,250,247,0) 64%);
-    pointer-events:none;
+    pointer-events:none; z-index:0;
   }
-
-  /* pointer-events on the frame so canvas detects mouse */
-  .hero-frame{ pointer-events:auto; }
 
   .hero-grid{
     position:relative; z-index:2;
@@ -223,7 +233,7 @@
   @media(max-width:760px){ .tri{ grid-template-columns:1fr; gap:46px; } }
 
   /* ============ CONTENT / PROJECTS ============ */
-  .content-sec{ background:var(--bg); }
+  .content-sec{ background:transparent; }
   .content-head{ text-align:center; margin-bottom:8px; }
   .content-head h2{ font-size:clamp(56px,12vw,150px); }
   .content-sub{ text-align:center; color:var(--ink-3); font-family:"Oswald"; text-transform:uppercase; letter-spacing:0.16em; font-size:13px; margin-bottom:40px; }
@@ -314,6 +324,9 @@
 </head>
 <body>
 
+<!-- ============ GLOBAL REACTIVE DOT GRID (fixed, full-page) ============ -->
+<canvas id="globalDotCanvas" aria-hidden="true"></canvas>
+
 <header class="nav">
   <div class="wrap nav-inner">
     <div class="brand"><span class="dot"></span>Megha&nbsp;Panthi</div>
@@ -330,10 +343,8 @@
 <!-- ============ HERO ============ -->
 <section class="hero" style="padding:0;" data-screen-label="Hero">
   <div class="hero-frame">
-    <div class="hero-bg" aria-hidden="true">
-      <canvas id="heroDotCanvas"></canvas>
-      <div class="glow"></div>
-    </div>
+    <!-- warm glow accent stays on hero only -->
+    <div class="hero-glow" aria-hidden="true"></div>
 
     <div class="hero-grid">
       <div class="hero-text">
@@ -520,7 +531,165 @@
 </section>
 
 <script>
-  // ---- scroll reveal (+ triggers counters / skill bars via .in) ----
+  // ============================================================
+  // GLOBAL REACTIVE DOT GRID — fixed canvas behind entire page
+  // ============================================================
+  (function(){
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+
+    const canvas = document.getElementById('globalDotCanvas');
+    const ctx    = canvas.getContext('2d');
+
+    // tunables
+    const SPACING      = 30;   // grid gap (px, logical)
+    const DOT_R        = 1.4;  // base dot radius
+    const INFLUENCE    = 130;  // hover push radius
+    const DAMPING      = 0.80; // velocity damping
+    const SPRING       = 0.11; // spring pull back
+    const RIPPLE_SPEED = 7;    // px/frame ripple grows
+    const RIPPLE_MAX   = 260;  // max ripple radius
+
+    // dot color per section background
+    // we use a single subtle dark color everywhere — adapts via opacity
+    const DOT_COLOR = '20,20,15';
+
+    let W, H, dpr, dots = [];
+    let mouse = { x: -9999, y: -9999 };
+    let ripples = [];
+
+    function resize(){
+      dpr = devicePixelRatio || 1;
+      W = canvas.width  = window.innerWidth  * dpr;
+      H = canvas.height = window.innerHeight * dpr;
+      buildGrid();
+    }
+
+    function buildGrid(){
+      dots = [];
+      const logW = W / dpr;
+      const logH = H / dpr;
+      // extend grid beyond viewport so dots exist while scrolling
+      const extraRows = Math.ceil(document.documentElement.scrollHeight / SPACING) + 2;
+      const cols = Math.ceil(logW / SPACING) + 1;
+      const offX = (logW - (cols - 1) * SPACING) / 2;
+      const offY = SPACING / 2;
+      for(let r = 0; r < extraRows; r++){
+        for(let c = 0; c < cols; c++){
+          const bx = offX + c * SPACING;
+          const by = offY + r * SPACING;
+          dots.push({ bx, by, x: bx, y: by, vx: 0, vy: 0 });
+        }
+      }
+    }
+
+    function addRipple(x, y){
+      ripples.push({ x, y, r: 0, alpha: 1 });
+    }
+
+    function loop(){
+      ctx.clearRect(0, 0, W, H);
+
+      // scroll offset so dots appear fixed on page, not viewport
+      const scrollY = window.scrollY;
+
+      // age ripples
+      ripples.forEach(rp => {
+        rp.r    += RIPPLE_SPEED;
+        rp.alpha = Math.max(0, 1 - rp.r / RIPPLE_MAX);
+      });
+      ripples = ripples.filter(rp => rp.alpha > 0);
+
+      const mx = mouse.x, my = mouse.y + scrollY; // mouse in page coords
+
+      dots.forEach(d => {
+        // ---- hover push (in page coords) ----
+        let pushX = 0, pushY = 0;
+        const hdx   = mx - d.bx, hdy = my - d.by;
+        const hdist = Math.sqrt(hdx * hdx + hdy * hdy);
+        if(hdist < INFLUENCE && hdist > 0){
+          const force = (1 - hdist / INFLUENCE) * 15;
+          pushX -= (hdx / hdist) * force;
+          pushY -= (hdy / hdist) * force;
+        }
+
+        // ---- ripple push ----
+        ripples.forEach(rp => {
+          const rpPageY = rp.y + rp._scrollY; // ripple locked to page
+          const rdx  = d.bx - rp.x, rdy = d.by - rpPageY;
+          const rd   = Math.sqrt(rdx * rdx + rdy * rdy);
+          const band = 34;
+          const diff = Math.abs(rd - rp.r);
+          if(rd > 0 && diff < band){
+            const strength = (1 - diff / band) * rp.alpha * 34;
+            pushX += (rdx / rd) * strength;
+            pushY += (rdy / rd) * strength;
+          }
+        });
+
+        // ---- spring physics ----
+        d.vx += (d.bx + pushX - d.x) * SPRING;
+        d.vy += (d.by + pushY - d.y) * SPRING;
+        d.vx *= DAMPING;
+        d.vy *= DAMPING;
+        d.x  += d.vx;
+        d.y  += d.vy;
+
+        // ---- screen position (subtract scroll) ----
+        const screenY = d.y - scrollY;
+
+        // cull dots outside viewport (with margin)
+        if(screenY < -SPACING * 2 || screenY > H / dpr + SPACING * 2) return;
+
+        // ---- proximity alpha & scale ----
+        const ndx  = mx - d.x, ndy = my - d.y;
+        const nd   = Math.sqrt(ndx * ndx + ndy * ndy);
+        const prox = Math.max(0, 1 - nd / (INFLUENCE * 0.9));
+        const alpha = 0.10 + prox * 0.50;
+        const scale = 1   + prox * 2.0;
+
+        ctx.beginPath();
+        ctx.arc(d.x * dpr, screenY * dpr, DOT_R * scale * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${DOT_COLOR},${alpha})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(loop);
+    }
+
+    // ---- events on document (whole page) ----
+    document.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+    document.addEventListener('mouseleave', () => {
+      mouse.x = -9999; mouse.y = -9999;
+    });
+    document.addEventListener('click', e => {
+      const rp = { x: e.clientX, y: e.clientY, r: 0, alpha: 1, _scrollY: window.scrollY };
+      ripples.push(rp);
+    });
+    document.addEventListener('touchmove', e => {
+      mouse.x = e.touches[0].clientX;
+      mouse.y = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchstart', e => {
+      mouse.x = e.touches[0].clientX;
+      mouse.y = e.touches[0].clientY;
+      const rp = { x: e.touches[0].clientX, y: e.touches[0].clientY, r: 0, alpha: 1, _scrollY: window.scrollY };
+      ripples.push(rp);
+    }, { passive: true });
+    document.addEventListener('touchend', () => {
+      mouse.x = -9999; mouse.y = -9999;
+    });
+
+    resize();
+    loop();
+    window.addEventListener('resize', () => { resize(); });
+  })();
+
+  // ============================================================
+  // SCROLL REVEAL
+  // ============================================================
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
       if(e.isIntersecting){
@@ -559,163 +728,6 @@
     });
     heroSec.addEventListener('mouseleave', ()=>{ heroImg.style.transform = ''; });
   }
-
-  // ============================================================
-  // ---- REACTIVE DOT GRID BACKGROUND ----
-  // ============================================================
-  (function(){
-    if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-
-    const canvas = document.getElementById('heroDotCanvas');
-    const ctx    = canvas.getContext('2d');
-
-    // tunables
-    const SPACING   = 28;    // px between dots
-    const DOT_R     = 1.3;   // base dot radius
-    const INFLUENCE = 120;   // hover push radius
-    const DAMPING   = 0.80;  // spring damping (lower = springier)
-    const SPRING    = 0.11;  // spring stiffness
-    const RIPPLE_SPEED = 6;  // px per frame ripple expands
-    const RIPPLE_MAX   = 240;// max ripple radius
-
-    let W, H, dots = [];
-    let mouse = { x: -9999, y: -9999 };
-    let ripples = [];
-
-    /* ----- size canvas to its parent (hero-frame) ----- */
-    function resize(){
-      const dpr = devicePixelRatio || 1;
-      const rect = canvas.parentElement.getBoundingClientRect();
-      W = canvas.width  = rect.width  * dpr;
-      H = canvas.height = rect.height * dpr;
-      buildGrid();
-    }
-
-    /* ----- create dot grid, centered so edges are symmetric ----- */
-    function buildGrid(){
-      dots = [];
-      const dpr  = devicePixelRatio || 1;
-      const logW = W / dpr;
-      const logH = H / dpr;
-      const cols = Math.ceil(logW / SPACING) + 1;
-      const rows = Math.ceil(logH / SPACING) + 1;
-      const offX = (logW - (cols - 1) * SPACING) / 2;
-      const offY = (logH - (rows - 1) * SPACING) / 2;
-      for(let r = 0; r < rows; r++){
-        for(let c = 0; c < cols; c++){
-          const bx = offX + c * SPACING;
-          const by = offY + r * SPACING;
-          dots.push({ bx, by, x: bx, y: by, vx: 0, vy: 0 });
-        }
-      }
-    }
-
-    /* ----- add a ripple at logical coords ----- */
-    function addRipple(x, y){
-      ripples.push({ x, y, r: 0, alpha: 1 });
-    }
-
-    /* ----- main render loop ----- */
-    function loop(){
-      const dpr = devicePixelRatio || 1;
-      ctx.clearRect(0, 0, W, H);
-
-      // age ripples
-      ripples.forEach(rp => {
-        rp.r     += RIPPLE_SPEED;
-        rp.alpha  = Math.max(0, 1 - rp.r / RIPPLE_MAX);
-      });
-      ripples = ripples.filter(rp => rp.alpha > 0);
-
-      const mx = mouse.x, my = mouse.y;
-
-      dots.forEach(d => {
-        // ---- hover push ----
-        let pushX = 0, pushY = 0;
-        const hdx  = mx - d.bx, hdy = my - d.by;
-        const hdist = Math.sqrt(hdx * hdx + hdy * hdy);
-        if(hdist < INFLUENCE && hdist > 0){
-          const force = (1 - hdist / INFLUENCE) * 14;
-          pushX -= (hdx / hdist) * force;
-          pushY -= (hdy / hdist) * force;
-        }
-
-        // ---- ripple push ----
-        ripples.forEach(rp => {
-          const rdx  = d.bx - rp.x, rdy = d.by - rp.y;
-          const rd   = Math.sqrt(rdx * rdx + rdy * rdy);
-          const band = 32;
-          const diff = Math.abs(rd - rp.r);
-          if(rd > 0 && diff < band){
-            const strength = (1 - diff / band) * rp.alpha * 32;
-            pushX += (rdx / rd) * strength;
-            pushY += (rdy / rd) * strength;
-          }
-        });
-
-        // ---- spring physics ----
-        const tx = d.bx + pushX, ty = d.by + pushY;
-        d.vx += (tx - d.x) * SPRING;
-        d.vy += (ty - d.y) * SPRING;
-        d.vx *= DAMPING;
-        d.vy *= DAMPING;
-        d.x  += d.vx;
-        d.y  += d.vy;
-
-        // ---- draw dot ----
-        const ndx   = mx - d.x, ndy = my - d.y;
-        const nd    = Math.sqrt(ndx * ndx + ndy * ndy);
-        const prox  = Math.max(0, 1 - nd / (INFLUENCE * 0.9));
-        const alpha = 0.1 + prox * 0.52;
-        const scale = 1  + prox * 1.9;
-
-        ctx.beginPath();
-        ctx.arc(d.x * dpr, d.y * dpr, DOT_R * scale * dpr, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(20,20,15,${alpha})`;
-        ctx.fill();
-      });
-
-      requestAnimationFrame(loop);
-    }
-
-    /* ----- pointer helpers (logical px relative to hero-frame) ----- */
-    function getPos(e){
-      const rect = canvas.parentElement.getBoundingClientRect();
-      if(e.touches && e.touches.length){
-        return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-      }
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-
-    /* ----- events on the hero frame (canvas itself has pointer-events:none) ----- */
-    const frame = document.querySelector('.hero-frame');
-
-    frame.addEventListener('mousemove', e => {
-      const p = getPos(e); mouse.x = p.x; mouse.y = p.y;
-    });
-    frame.addEventListener('mouseleave', () => {
-      mouse.x = -9999; mouse.y = -9999;
-    });
-    frame.addEventListener('click', e => {
-      const p = getPos(e); addRipple(p.x, p.y);
-    });
-    frame.addEventListener('touchmove', e => {
-      const p = getPos(e); mouse.x = p.x; mouse.y = p.y;
-    }, { passive: true });
-    frame.addEventListener('touchstart', e => {
-      const p = getPos(e);
-      mouse.x = p.x; mouse.y = p.y;
-      addRipple(p.x, p.y);
-    }, { passive: true });
-    frame.addEventListener('touchend', () => {
-      mouse.x = -9999; mouse.y = -9999;
-    });
-
-    /* ----- kick off ----- */
-    resize();
-    loop();
-    window.addEventListener('resize', resize);
-  })();
 </script>
 </body>
 </html>
