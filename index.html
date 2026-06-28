@@ -320,9 +320,82 @@
     .hero-photo::before,.hero-photo::after,.brand .dot,.status-dot::after,.scroll-cue .sc-mouse::after,.photo-badge{ animation:none !important; }
     .skill-bar i{ width:var(--w) !important; transition:none !important; }
   }
+
+  /* ============ CUSTOM CURSOR ============ */
+  *, *::before, *::after { cursor: none !important; }
+
+  #cursor-ring{
+    position:fixed;
+    top:0; left:0;
+    width:36px; height:36px;
+    border-radius:50%;
+    border:2px solid rgba(20,20,15,0.55);
+    pointer-events:none;
+    z-index:99999;
+    transform:translate(-50%,-50%);
+    transition:
+      width .35s cubic-bezier(.2,.7,.2,1),
+      height .35s cubic-bezier(.2,.7,.2,1),
+      border-color .35s ease,
+      background .35s ease,
+      opacity .3s ease;
+    will-change:transform;
+    mix-blend-mode:multiply;
+  }
+  #cursor-dot{
+    position:fixed;
+    top:0; left:0;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:rgba(20,20,15,0.85);
+    pointer-events:none;
+    z-index:99999;
+    transform:translate(-50%,-50%);
+    will-change:transform;
+    transition:opacity .2s ease, transform .15s ease;
+  }
+
+  /* hover state — ring expands, fills with accent tint */
+  body.cur-hover #cursor-ring{
+    width:56px; height:56px;
+    border-color:var(--accent-ink);
+    background:rgba(180,96,46,0.08);
+  }
+  body.cur-hover #cursor-dot{
+    transform:translate(-50%,-50%) scale(0.5);
+    opacity:0.5;
+  }
+
+  /* text/link state — ring turns into an underline pill */
+  body.cur-link #cursor-ring{
+    width:64px; height:64px;
+    border-color:var(--accent-ink);
+    background:rgba(180,96,46,0.12);
+    border-width:1.5px;
+  }
+  body.cur-link #cursor-dot{
+    opacity:0;
+  }
+
+  /* click flash */
+  #cursor-ring.clicking{
+    width:24px !important; height:24px !important;
+    background:rgba(20,20,15,0.12) !important;
+    transition:width .1s ease, height .1s ease, background .1s ease;
+  }
+
+  /* hide on touch devices */
+  @media(hover:none){ #cursor-ring,#cursor-dot{ display:none; } }
+
+  /* dark section — invert cursor */
+  .contact #cursor-ring{ border-color:rgba(250,250,247,0.6); }
 </style>
 </head>
 <body>
+
+<!-- ============ CUSTOM CURSOR ============ -->
+<div id="cursor-ring" aria-hidden="true"></div>
+<div id="cursor-dot"  aria-hidden="true"></div>
 
 <!-- ============ GLOBAL REACTIVE DOT GRID (fixed, full-page) ============ -->
 <canvas id="globalDotCanvas" aria-hidden="true"></canvas>
@@ -685,6 +758,69 @@
     resize();
     loop();
     window.addEventListener('resize', () => { resize(); });
+  })();
+
+  // ============================================================
+  // CUSTOM CURSOR
+  // ============================================================
+  (function(){
+    if(matchMedia('(hover:none)').matches) return; // skip on touch-only
+
+    const ring = document.getElementById('cursor-ring');
+    const dot  = document.getElementById('cursor-dot');
+    let rx = window.innerWidth/2, ry = window.innerHeight/2; // ring (lagged)
+    let tx = rx, ty = ry;                                     // target (instant)
+    let raf;
+
+    // smooth ring follows mouse with slight lag
+    function animateRing(){
+      rx += (tx - rx) * 0.13;
+      ry += (ty - ry) * 0.13;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      raf = requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    document.addEventListener('mousemove', e => {
+      tx = e.clientX; ty = e.clientY;
+      // dot is instant
+      dot.style.left = tx + 'px';
+      dot.style.top  = ty + 'px';
+    });
+
+    document.addEventListener('mouseleave', () => {
+      ring.style.opacity = '0';
+      dot.style.opacity  = '0';
+    });
+    document.addEventListener('mouseenter', () => {
+      ring.style.opacity = '';
+      dot.style.opacity  = '';
+    });
+
+    // click flash
+    document.addEventListener('mousedown', () => {
+      ring.classList.add('clicking');
+    });
+    document.addEventListener('mouseup', () => {
+      ring.classList.remove('clicking');
+    });
+
+    // hover state detection
+    const hoverTargets   = 'a, button, .hbtn, .cbtn, .nav-cta, .proj, .skill-row, .photo-badge, .scroll-cue';
+    const linkTargets    = 'a, button, .hbtn, .cbtn, .nav-cta, .nav-cta';
+
+    document.addEventListener('mouseover', e => {
+      const el = e.target.closest(hoverTargets);
+      const isLink = e.target.closest(linkTargets);
+      document.body.classList.toggle('cur-link',  !!isLink);
+      document.body.classList.toggle('cur-hover', !!el && !isLink);
+    });
+    document.addEventListener('mouseout', e => {
+      if(!e.target.closest(hoverTargets)){
+        document.body.classList.remove('cur-hover','cur-link');
+      }
+    });
   })();
 
   // ============================================================
