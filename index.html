@@ -218,20 +218,35 @@
   /* ============ EDU / SKILLS / EXP ============ */
   .tri{
     display:grid;
-    grid-template-columns:1fr 1fr 1fr;
+    grid-template-columns:1fr 1.7fr;
     grid-template-areas:
-      "edu skills skills"
-      "exp skills skills";
+      "edu skills"
+      "exp skills";
     gap:40px;
   }
   .tri-edu{ grid-area:edu; }
   .tri-exp{ grid-area:exp; }
   .tri-skills{ grid-area:skills; }
-  .skill-list{
-    column-count:2;
-    column-gap:40px;
+  .entry-dot{ display:flex; align-items:flex-start; gap:14px; }
+  .entry-dot .dot-ring{ width:14px; height:14px; border-radius:50%; border:2px solid var(--ink-1); margin-top:5px; flex:none; }
+  .entry-dot .entry{ margin-bottom:0; }
+  .skill-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
   }
-  .skill-list .skill-row{ break-inside:avoid; }
+  .skill-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:#ffffff;
+    border:1px solid rgba(20,20,15,0.08);
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:0 4px 14px rgba(20,20,15,0.07);
+  }
+  .skill-card .skill-badge{ border-radius:12px; }
+  .skill-card .skill-name{ font-size:14px; }
   .col-head{ margin-bottom:26px; }
   .col-head h3{ font-size:clamp(30px,4vw,46px); }
   .entry{ margin-bottom:26px; }
@@ -247,7 +262,10 @@
   .skill-bar i{ display:block; height:100%; border-radius:99px; background:var(--ink-1); }
   @media(max-width:760px){
     .tri{ grid-template-columns:1fr; grid-template-rows:auto; grid-template-areas:"edu" "exp" "skills"; gap:46px; }
-    .skill-list{ column-count:1; }
+    .skill-grid{ grid-template-columns:1fr 1fr; }
+  }
+  @media(max-width:480px){
+    .skill-grid{ grid-template-columns:1fr; }
   }
 
   /* ============ CONTENT / PROJECTS ============ */
@@ -514,10 +532,13 @@
     <!-- EDUCATION -->
     <div class="reveal tri-edu">
       <div class="col-head"><h3 class="poster outline">Education</h3></div>
-      <div class="entry">
-        <div class="role">B.Tech — Computer Science (AIML)</div>
-        <div class="org">School of Information Technology RGPV</div>
-        <div class="when">2023 — 2027</div>
+      <div class="entry-dot">
+        <span class="dot-ring"></span>
+        <div class="entry">
+          <div class="role">B.Tech — Computer Science (AIML)</div>
+          <div class="org">School of Information Technology RGPV</div>
+          <div class="when">2023 — 2027</div>
+        </div>
       </div>
       <!-- <div class="entry">
         <div class="role">Full-Stack Web Specialization</div>
@@ -534,10 +555,13 @@
     <!-- EXPERIENCE -->
     <div class="reveal tri-exp">
       <div class="col-head"><h3 class="poster outline">Experience</h3></div>
-      <div class="entry">
-        <div class="role">Full-Stack Developer — Easydevs</div>
-        <div class="org">Internship</div>
-        <div class="when">2026 — Present</div>
+      <div class="entry-dot">
+        <span class="dot-ring"></span>
+        <div class="entry">
+          <div class="role">Full-Stack Developer — Easydevs</div>
+          <div class="org">Internship</div>
+          <div class="when">2026 — Present</div>
+        </div>
       </div>
       <!-- <div class="entry">
         <div class="role">Software Engineer Intern</div>
@@ -554,16 +578,16 @@
     <!-- SKILLS -->
     <div class="reveal tri-skills">
       <div class="col-head"><h3 class="poster outline">Skills</h3></div>
-      <div class="skill-list">
-        <div class="skill-row"><span class="skill-badge" style="background:#E535AB"><img src="https://cdn.simpleicons.org/nextdotjs/FFFFFF" alt="Next.js"/></span><span class="skill-name">Next.js</span><span class="skill-bar"><i style="--w:72%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#3C873A"><img src="https://cdn.simpleicons.org/nodedotjs/FFFFFF" alt="Node.js"/></span><span class="skill-name">Node.js</span><span class="skill-bar"><i style="--w:90%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#336791"><img src="https://cdn.simpleicons.org/express/FFFFFF" alt="Express.js"/></span><span class="skill-name">Express.js</span><span class="skill-bar"><i style="--w:82%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#61DAFB;color:#14140F"><img src="https://cdn.simpleicons.org/react/14140F" alt="React.js"/></span><span class="skill-name">React.js</span><span class="skill-bar"><i style="--w:94%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#FF9900;color:#14140F"><img src="https://cdn.simpleicons.org/openjdk/14140F" alt="Java"/></span><span class="skill-name">Java</span><span class="skill-bar"><i style="--w:78%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#2496ED"><img src="https://cdn.simpleicons.org/tailwindcss/FFFFFF" alt="TailwindCSS"/></span><span class="skill-name">TailwindCSS</span><span class="skill-bar"><i style="--w:75%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#E535AB"><img src="https://cdn.simpleicons.org/python/FFFFFF" alt="Python"/></span><span class="skill-name">Python</span><span class="skill-bar"><i style="--w:72%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#2496ED"><img src="https://cdn.simpleicons.org/mongodb/FFFFFF" alt="MongoDB"/></span><span class="skill-name">MongoDB</span><span class="skill-bar"><i style="--w:75%"></i></span></div>
-        <div class="skill-row"><span class="skill-badge" style="background:#3178C6"><img src="https://cdn.simpleicons.org/javascript/FFFFFF" alt="JavaScript"/></span><span class="skill-name">javaScript</span><span class="skill-bar"><i style="--w:88%"></i></span></div>
+      <div class="skill-grid">
+        <div class="skill-card"><span class="skill-badge" style="background:#E535AB"><img src="https://cdn.simpleicons.org/nextdotjs/FFFFFF" alt="Next.js"/></span><span class="skill-name">Next.js</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#3C873A"><img src="https://cdn.simpleicons.org/nodedotjs/FFFFFF" alt="Node.js"/></span><span class="skill-name">Node.js</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#336791"><img src="https://cdn.simpleicons.org/express/FFFFFF" alt="Express.js"/></span><span class="skill-name">Express.js</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#61DAFB;color:#14140F"><img src="https://cdn.simpleicons.org/react/14140F" alt="React.js"/></span><span class="skill-name">React.js</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#FF9900;color:#14140F"><img src="https://cdn.simpleicons.org/openjdk/14140F" alt="Java"/></span><span class="skill-name">Java</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#2496ED"><img src="https://cdn.simpleicons.org/tailwindcss/FFFFFF" alt="TailwindCSS"/></span><span class="skill-name">TailwindCSS</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#E535AB"><img src="https://cdn.simpleicons.org/python/FFFFFF" alt="Python"/></span><span class="skill-name">Python</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#2496ED"><img src="https://cdn.simpleicons.org/mongodb/FFFFFF" alt="MongoDB"/></span><span class="skill-name">MongoDB</span></div>
+        <div class="skill-card"><span class="skill-badge" style="background:#3178C6"><img src="https://cdn.simpleicons.org/javascript/FFFFFF" alt="JavaScript"/></span><span class="skill-name">javaScript</span></div>
       </div>
     </div>
   </div>
@@ -580,18 +604,21 @@
         <div class="ptag">Ice-cream ordering site with flavors, menu &amp; cart.</div>
         <div class="proj-shot"><img src="https://i.pinimg.com/1200x/b7/ec/ad/b7ecad27d7887df967ae51ba8fed177b.jpg" alt="Frozen Scoops live preview" loading="lazy"/></div>
         <div class="pstack"><span>React</span><span>Tailwind</span><span>Vercel</span></div>
+        <div class="plink">frozen-scoops-icecream.vercel.app ↗</div>
       </a>
       <a class="proj" style="background:#EAE3F7" href="https://flagged-ai.vercel.app/" target="_blank" rel="noopener">
         <div class="pname" style="color:#5B3FA1">Flagged&nbsp;AI</div>
         <div class="ptag">AI-powered content flagging &amp; moderation tool.</div>
         <div class="proj-shot"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNPVD3iGS9ihogaXY7dCjc4MsHiO-8aYW1t08VSuIZbtHLvcsq9NSQ7n77&s=10" alt="Flagged AI live preview" loading="lazy"/></div>
         <div class="pstack"><span>Next.js</span><span>AI</span><span>Vercel</span></div>
+        <div class="plink">flagged-ai.vercel.app ↗</div>
       </a>
       <a class="proj" style="background:#DDEBF9" href="https://weather-app-chi-brown-46.vercel.app/" target="_blank" rel="noopener">
         <div class="pname" style="color:#1565C0">Weather&nbsp;App</div>
         <div class="ptag">Real-time forecast lookup with search &amp; live conditions.</div>
         <div class="proj-shot"><img src="https://i.pinimg.com/736x/83/94/aa/8394aaff57e309399287be4145d2be5f.jpg" alt="Weather App live preview" loading="lazy"/></div>
         <div class="pstack"><span>React</span><span>Weather&nbsp;API</span><span>Vercel</span></div>
+        <div class="plink">weather-app-chi-brown-46.vercel.app ↗</div>
       </a>
     </div>
   </div>
